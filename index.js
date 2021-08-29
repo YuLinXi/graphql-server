@@ -1,13 +1,19 @@
-const { graphql, buildSchema } = require("graphql");
+const { buildSchema } = require("graphql");
+const express = require("express");
+const { graphqlHTTP } = require("express-graphql");
+const cors = require("cors");
 
-const scheme = buildSchema(`
+const app = express();
+app.use(cors());
+
+const schema = buildSchema(`
   type Query {
     name: String
     count: Int
   }
 `);
 
-const root = {
+const rootValue = {
   name() {
     return "yulinxi";
   },
@@ -16,6 +22,15 @@ const root = {
   },
 };
 
-graphql(scheme, "{ name }", root).then((res) => {
-  console.log(res);
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema,
+    rootValue,
+    graphiql: true,
+  })
+);
+
+app.listen(8899, () => {
+  console.log("Graphql Server is running at http://localhost:8899");
 });
