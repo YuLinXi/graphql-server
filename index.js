@@ -1,36 +1,31 @@
-const { buildSchema } = require("graphql");
-const express = require("express");
-const { graphqlHTTP } = require("express-graphql");
-const cors = require("cors");
+const { ApolloServer, gql } = require("apollo-server");
 
-const app = express();
-app.use(cors());
-
-const schema = buildSchema(`
-  type Query {
-    name: String
-    count: Int
+const typeDefs = gql`
+  type Book {
+    title: String
+    author: String
   }
-`);
 
-const rootValue = {
-  name() {
-    return "yulinxi";
+  type Query {
+    books: [Book]
+  }
+`;
+
+const books = [
+  {
+    title: "Title",
+    author: "Author",
   },
-  count() {
-    return 1;
+];
+
+const resolvers = {
+  Query: {
+    books: () => books,
   },
 };
 
-app.use(
-  "/graphql",
-  graphqlHTTP({
-    schema,
-    rootValue,
-    graphiql: true,
-  })
-);
+const server = new ApolloServer({ typeDefs, resolvers });
 
-app.listen(8899, () => {
-  console.log("Graphql Server is running at http://localhost:8899");
+server.listen().then(({ url }) => {
+  console.log(`Server ready at ${url}`);
 });
